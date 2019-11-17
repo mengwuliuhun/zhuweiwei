@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.kgc.ssm.mybatis.TryReportMapper">
+  <resultMap id="BaseResultMap" type="cn.kgc.ssm.entity.TryReport">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="title" jdbcType="VARCHAR" property="title" />
+    <result column="image" jdbcType="VARCHAR" property="image" />
+    <result column="apply_id" jdbcType="INTEGER" property="applyId" />
+    <result column="pub_date" jdbcType="DATE" property="pubDate" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, title, image, apply_id, pub_date
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from try_report
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from try_report
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="cn.kgc.ssm.entity.TryReport">
+    insert into try_report (id, title, image, 
+      apply_id, pub_date)
+    values (#{id,jdbcType=INTEGER}, #{title,jdbcType=VARCHAR}, #{image,jdbcType=VARCHAR}, 
+      #{applyId,jdbcType=INTEGER}, #{pubDate,jdbcType=DATE})
+  </insert>
+  <insert id="insertSelective" parameterType="cn.kgc.ssm.entity.TryReport">
+    insert into try_report
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="title != null">
+        title,
+      </if>
+      <if test="image != null">
+        image,
+      </if>
+      <if test="applyId != null">
+        apply_id,
+      </if>
+      <if test="pubDate != null">
+        pub_date,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="title != null">
+        #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="image != null">
+        #{image,jdbcType=VARCHAR},
+      </if>
+      <if test="applyId != null">
+        #{applyId,jdbcType=INTEGER},
+      </if>
+      <if test="pubDate != null">
+        #{pubDate,jdbcType=DATE},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.kgc.ssm.entity.TryReport">
+    update try_report
+    <set>
+      <if test="title != null">
+        title = #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="image != null">
+        image = #{image,jdbcType=VARCHAR},
+      </if>
+      <if test="applyId != null">
+        apply_id = #{applyId,jdbcType=INTEGER},
+      </if>
+      <if test="pubDate != null">
+        pub_date = #{pubDate,jdbcType=DATE},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.kgc.ssm.entity.TryReport">
+    update try_report
+    set title = #{title,jdbcType=VARCHAR},
+      image = #{image,jdbcType=VARCHAR},
+      apply_id = #{applyId,jdbcType=INTEGER},
+      pub_date = #{pubDate,jdbcType=DATE}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <!--通过hot和new来使coolItem按最热或者最新来降序排列-->
+  <resultMap id="strvl" type="cn.kgc.ssm.entity.vo.TryReportVo">
+    <result property="thumbNum" column="thumbNum"/>
+    <result property="commentNum" column="commentNum"/>
+    <result property="userId" column="userId"/>
+    <result column="apply_id" jdbcType="INTEGER" property="applyId" />
+    <result column="pub_date" jdbcType="DATE" property="pubDate" />
+  </resultMap>
+  <select id="selectTryReportVoList" resultMap="strvl">
+    select tr.*
+    ,(select count(*) from report_thumb where report_id=tr.id) thumbNum
+    ,(select count(*) from report_comment where report_id=tr.id) commentNum,
+    (select user_id from try_apply where id=tr.apply_id ) userId
+    from try_report tr
+    <if test="th eq 'hot'">
+      order by thumbNum desc,commentNum desc
+    </if>
+    <if test="th eq 'new'">
+      order by pub_date desc
+    </if>
+  </select>
+</mapper>

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.kgc.ssm.mybatis.CoolItemMapper">
+    <resultMap id="BaseResultMap" type="cn.kgc.ssm.entity.CoolItem">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="title" jdbcType="VARCHAR" property="title"/>
+        <result column="price" jdbcType="DOUBLE" property="price"/>
+        <result column="image" jdbcType="VARCHAR" property="image"/>
+        <result column="pub_date" jdbcType="DATE" property="pubDate"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, name, title, price, image, pub_date
+  </sql>
+    <sql id="base_select_sql">
+        select
+        <include refid="Base_Column_List"/>
+        from cool_item
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from cool_item
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete from cool_item
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+    <insert id="insert" parameterType="cn.kgc.ssm.entity.CoolItem">
+        insert into cool_item (id, name, title,
+        price, image, pub_date)
+        values (#{id,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{title,jdbcType=VARCHAR},
+        #{price,jdbcType=DOUBLE}, #{image,jdbcType=VARCHAR}, #{pubDate,jdbcType=DATE})
+    </insert>
+    <insert id="insertSelective" parameterType="cn.kgc.ssm.entity.CoolItem">
+        insert into cool_item
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="name != null">
+                name,
+            </if>
+            <if test="title != null">
+                title,
+            </if>
+            <if test="price != null">
+                price,
+            </if>
+            <if test="image != null">
+                image,
+            </if>
+                pub_date,
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="title != null">
+                #{title,jdbcType=VARCHAR},
+            </if>
+            <if test="price != null">
+                #{price,jdbcType=DOUBLE},
+            </if>
+            <if test="image != null">
+                #{image,jdbcType=VARCHAR},
+            </if>
+            date(now())
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="cn.kgc.ssm.entity.CoolItem">
+        update cool_item
+        <set>
+            <if test="name != null">
+                name = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="title != null">
+                title = #{title,jdbcType=VARCHAR},
+            </if>
+            <if test="price != null">
+                price = #{price,jdbcType=DOUBLE},
+            </if>
+            <if test="image != null">
+                image = #{image,jdbcType=VARCHAR},
+            </if>
+
+                pub_date = date(now())
+
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="cn.kgc.ssm.entity.CoolItem">
+        update cool_item
+        set name = #{name,jdbcType=VARCHAR},
+        title = #{title,jdbcType=VARCHAR},
+        price = #{price,jdbcType=DOUBLE},
+        image = #{image,jdbcType=VARCHAR},
+        pub_date = #{pubDate,jdbcType=DATE}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <!--通过hot安定new来使coolItem按最热或者最新来降序排列-->
+    <resultMap id="scivlhn" type="cn.kgc.ssm.entity.vo.CoolItemVo">
+        <result property="thumbNum" column="thumbNum"/>
+        <result property="commentNum" column="commentNum"/>
+    </resultMap>
+    <select id="selectCoolItemVoList" resultMap="scivlhn">
+        select ci.*
+        ,(select count(*) from cool_item_thumb where item_id=ci.id) thumbNum
+        ,(select count(*) from cool_item_comment where item_id=ci.id) commentNum
+        from cool_item ci
+        <if test="th eq 'hot'">
+            order by thumbNum desc,commentNum desc
+        </if>
+        <if test="th eq 'new'">
+            order by pub_date desc
+        </if>
+    </select>
+    <!--通过姓名和电话模糊查询得到产品集合-->
+    <select id="selectCoolItemListLikeByNameAndTitle" resultMap="BaseResultMap">
+        <include refid="base_select_sql"/>
+        <trim prefix="where" prefixOverrides="and">
+            <if test="name neq null">name rlike #{name}</if>
+            <if test="title neq null ">and title rlike #{title}</if>
+        </trim>
+    </select>
+</mapper>

@@ -1,0 +1,52 @@
+
+spring:
+  profiles:
+    active: dog
+  jpa:
+    hibernate:
+      ddl-auto: create #update
+    show-sql: true
+#  redis:
+#    database: 0
+#    host: 10.0.0.66
+#    port: 6379
+#    jedis:
+#      pool:
+#        max-active: 8
+#        max-wait: -1
+#        max-idle: 8
+#        min-idle: 0
+#    timeout: 10000
+  datasource:
+    username: root
+    password: root
+    url: jdbc:mysql://localhost:3306/jg?serverTimezone=UTC
+    driver-class-name: com.mysql.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+  mvc:
+    date-format:
+  mail:
+    username: 1007493965@qq.com
+    password: spigmwbqrgdibbda
+    host: smtp.qq.com
+
+
+mybatis:
+#  config-location: mybatisconfig.xml
+  mapper-locations: classpath:cn/kgc/ssm/mybatis/*.xml
+
+
+#logging:
+#  pattern:
+#    console: "[%-5p]:%m %l%n "  #     定义打印的日志格式
+#    #[%-5p]:%m %l%n   "%d - %msg%n"
+#  #    dateformat: #设置日志日期格式
+#  #    file: #定义输出到日志文件的日志格式
+#  #  config: #日志配置文件的位置。例如，classpath:logback.xml。
+#  #file: E:/sell/sell.log 设置保存日志的日志文件
+#  #    max-history:
+#  #    max-size: #设置日志文件最大大小 #设置日志等级
+#  #  path: / #日志文件的位置，例如/var/log
+#  register-shutdown-hook: false #当初始化日志系统时，为其注册一个关闭钩子。
+#  level:
+#    root: info

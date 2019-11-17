@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.kgc.ssm.mybatis.TryItemMapper">
+    <resultMap id="BaseResultMap" type="cn.kgc.ssm.entity.TryItem">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="title" jdbcType="VARCHAR" property="title"/>
+        <result column="image" jdbcType="VARCHAR" property="image"/>
+        <result column="quantity" jdbcType="INTEGER" property="quantity"/>
+        <result column="category" jdbcType="VARCHAR" property="category"/>
+        <result column="begin_date" jdbcType="DATE" property="beginDate"/>
+        <result column="end_date" jdbcType="DATE" property="endDate"/>
+        <result column="price" jdbcType="DOUBLE" property="price"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    id, title, image, quantity, category, begin_date, end_date, price
+  </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from try_item
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        delete from try_item
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+    <insert id="insert" parameterType="cn.kgc.ssm.entity.TryItem">
+        insert into try_item (id, title, image,
+        quantity, category, begin_date,
+        end_date, price)
+        values (#{id,jdbcType=INTEGER}, #{title,jdbcType=VARCHAR}, #{image,jdbcType=VARCHAR},
+        #{quantity,jdbcType=INTEGER}, #{category,jdbcType=VARCHAR}, #{beginDate,jdbcType=DATE},
+        #{endDate,jdbcType=DATE}, #{price,jdbcType=DOUBLE})
+    </insert>
+    <insert id="insertSelective" parameterType="cn.kgc.ssm.entity.TryItem">
+        insert into try_item
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="title != null">
+                title,
+            </if>
+            <if test="image != null">
+                image,
+            </if>
+            <if test="quantity != null">
+                quantity,
+            </if>
+            <if test="category != null">
+                category,
+            </if>
+            <if test="beginDate != null">
+                begin_date,
+            </if>
+            <if test="endDate != null">
+                end_date,
+            </if>
+            <if test="price != null">
+                price,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="title != null">
+                #{title,jdbcType=VARCHAR},
+            </if>
+            <if test="image != null">
+                #{image,jdbcType=VARCHAR},
+            </if>
+            <if test="quantity != null">
+                #{quantity,jdbcType=INTEGER},
+            </if>
+            <if test="category != null">
+                #{category,jdbcType=VARCHAR},
+            </if>
+            <if test="beginDate != null">
+                #{beginDate,jdbcType=DATE},
+            </if>
+            <if test="endDate != null">
+                #{endDate,jdbcType=DATE},
+            </if>
+            <if test="price != null">
+                #{price,jdbcType=DOUBLE},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="cn.kgc.ssm.entity.TryItem">
+        update try_item
+        <set>
+            <if test="title != null">
+                title = #{title,jdbcType=VARCHAR},
+            </if>
+            <if test="image != null">
+                image = #{image,jdbcType=VARCHAR},
+            </if>
+            <if test="quantity != null">
+                quantity = #{quantity,jdbcType=INTEGER},
+            </if>
+            <if test="category != null">
+                category = #{category,jdbcType=VARCHAR},
+            </if>
+            <if test="beginDate != null">
+                begin_date = #{beginDate,jdbcType=DATE},
+            </if>
+            <if test="endDate != null">
+                end_date = #{endDate,jdbcType=DATE},
+            </if>
+            <if test="price != null">
+                price = #{price,jdbcType=DOUBLE},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="cn.kgc.ssm.entity.TryItem">
+        update try_item
+        set title = #{title,jdbcType=VARCHAR},
+        image = #{image,jdbcType=VARCHAR},
+        quantity = #{quantity,jdbcType=INTEGER},
+        category = #{category,jdbcType=VARCHAR},
+        begin_date = #{beginDate,jdbcType=DATE},
+        end_date = #{endDate,jdbcType=DATE},
+        price = #{price,jdbcType=DOUBLE}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <!--通过类别和类型来确定TryItemVo视图集合,其中类别为apply,try,end分别对应在试用之前,中,以及试用介绍-->
+    <resultMap id="stisbcot" type="cn.kgc.ssm.entity.vo.TryItemVo">
+        <result column="begin_date" property="beginDate"/>
+        <result column="end_date" property="endDate"/>
+        <result column="acnt" property="acnt"/>
+        <result column="rcnt" property="rcnt"/>
+    </resultMap>
+    <select id="selectTryItemsByCategoryOrType" resultMap="stisbcot">
+        SELECT ti.*,acnt,rcnt FROM try_item ti LEFT JOIN
+        (SELECT item_id,count(1) acnt
+        FROM try_apply GROUP BY item_id) ta
+        ON ti.id=ta.item_id LEFT JOIN
+        (SELECT item_id,count(1) rcnt
+        FROM try_apply ta RIGHT JOIN try_report tr
+        ON ta.id=tr.apply_id GROUP BY item_id
+        ) tr ON ti.id=tr.item_id
+        <trim prefix="where" suffixOverrides="and">
+            <if test="category != null">
+                category=#{category}
+            </if>
+            <if test="type eq 'apply'">
+                and date(now()) &lt; begin_date
+            </if>
+            <if test="type eq 'try'">
+                and (date(now()) between begin_date and end_date)
+            </if>
+            <if test="type eq 'end'">
+                and date(now()) &gt; end_date
+            </if>
+        </trim>
+    </select>
+    <!--通过类别和类型来确定TryItemVo视图集合,其中类别为apply,try,end分别对应在试用之前,中,以及试用介绍-->
+    <resultMap id="stivbi" type="cn.kgc.ssm.entity.vo.TryItemVo">
+        <result column="begin_date" property="beginDate"/>
+        <result column="end_date" property="endDate"/>
+        <result column="acnt" property="acnt"/>
+        <result column="rcnt" property="rcnt"/>
+    </resultMap>
+    <select id="selectTryItemVoById" resultMap="stivbi">
+        SELECT ti.*,acnt,rcnt FROM try_item ti LEFT JOIN
+        (SELECT item_id,count(1) acnt
+        FROM try_apply GROUP BY item_id) ta
+        ON ti.id=ta.item_id LEFT JOIN
+        (SELECT item_id,count(1) rcnt
+        FROM try_apply ta RIGHT JOIN try_report tr
+        ON ta.id=tr.apply_id GROUP BY item_id
+        ) tr ON ti.id=tr.item_id
+        <trim prefix="where">
+            <if test="id != null">
+                id=#{id}
+            </if>
+        </trim>
+    </select>
+</mapper>

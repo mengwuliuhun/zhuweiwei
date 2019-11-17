@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<p th:text="${hello}"></p>
+<p th:utext="${hello}" ></p>
+<!--th:each每次遍历都会生成所在标签,3个h4-->
+<h2 th:text="${user}" th:each="user:${users}"></h2>
+<hr>
+<!--三个span-->
+<h2>
+    <span th:each="user:${users}">[[${user}]]</span>
+</h2>
+</body>
+
+
+</html>
